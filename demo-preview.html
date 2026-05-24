@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta property="og:title" content="Chismógrafo Social" />
+    <meta property="og:description" content="Preguntas virales, menciones y ranking social." />
+    <meta property="og:image" content="./public/og-chismografo.png" />
+    <title>Chismógrafo Social demo</title>
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: radial-gradient(circle at 20% 10%, rgba(255,77,103,.3), transparent 24rem),
+          radial-gradient(circle at 88% 20%, rgba(70,204,255,.24), transparent 22rem),
+          linear-gradient(135deg, #08080d, #15111b 50%, #091018);
+        color: white;
+        font-family: Arial, Helvetica, sans-serif;
+      }
+      button, textarea { font: inherit; }
+      .app { display: grid; grid-template-columns: 18rem minmax(0, 1fr) 22rem; gap: 1rem; max-width: 1280px; margin: 0 auto; padding: 1rem; }
+      .panel, .main, .card {
+        border: 1px solid rgba(255,255,255,.12);
+        background: linear-gradient(135deg, rgba(255,255,255,.13), rgba(255,255,255,.06));
+        backdrop-filter: blur(20px);
+        border-radius: 28px;
+      }
+      .panel { padding: 1rem; }
+      .brand { display: flex; align-items: center; gap: .8rem; font-weight: 900; font-size: 1.2rem; }
+      .logo, .avatar {
+        width: 48px; height: 48px; border-radius: 16px;
+        background: conic-gradient(#ff4d67, #f8d34a, #21f5aa, #46ccff, #ff4d67);
+        display: grid; place-items: center; color: #08080d; font-weight: 900;
+      }
+      nav { margin-top: 2rem; display: grid; gap: .5rem; }
+      nav button, .pill, .send, .ghost {
+        border: 0; border-radius: 999px; padding: .8rem 1rem; font-weight: 900; cursor: pointer;
+      }
+      nav button, .ghost { background: rgba(255,255,255,.09); color: rgba(255,255,255,.8); }
+      .main { min-height: calc(100vh - 2rem); overflow: hidden; }
+      .topbar { display: flex; justify-content: space-between; align-items: center; padding: .9rem 1rem; border-bottom: 1px solid rgba(255,255,255,.1); }
+      .feed { height: calc(100vh - 5rem); overflow: auto; scroll-snap-type: y mandatory; }
+      .screen { min-height: calc(100vh - 5rem); display: grid; place-items: center; padding: 2rem 1rem; scroll-snap-align: start; }
+      .composer { width: min(100%, 680px); }
+      .chips { display: flex; gap: .5rem; overflow-x: auto; margin-bottom: 1rem; }
+      .pill { background: rgba(255,255,255,.1); color: rgba(255,255,255,.7); white-space: nowrap; }
+      .pill.active { background: white; color: #08080d; }
+      .card { padding: 1.4rem; box-shadow: 0 20px 70px rgba(255,77,103,.22); }
+      h1 { font-size: clamp(2rem, 7vw, 4rem); line-height: .98; margin: .4rem 0 1rem; }
+      h2 { font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1; margin: .4rem 0 1rem; }
+      textarea { width: 100%; min-height: 120px; resize: none; border: 1px solid rgba(255,255,255,.12); background: rgba(0,0,0,.25); color: white; border-radius: 24px; padding: 1rem; outline: none; font-weight: 800; }
+      .row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+      .send { background: #ff4d67; color: white; box-shadow: 0 14px 45px rgba(255,77,103,.34); }
+      .metric { display: inline-flex; gap: .35rem; align-items: center; margin-right: .8rem; color: rgba(255,255,255,.7); font-weight: 900; }
+      .mention { display: inline-block; margin-top: .8rem; border-radius: 999px; background: rgba(70,204,255,.18); color: #46ccff; padding: .35rem .7rem; font-weight: 900; }
+      .notice { position: fixed; left: 50%; top: 1rem; transform: translateX(-50%) translateY(-140%); width: min(92vw, 420px); background: rgba(8,8,13,.94); border: 1px solid rgba(33,245,170,.45); border-radius: 24px; padding: 1rem; transition: .35s ease; box-shadow: 0 0 40px rgba(33,245,170,.22); z-index: 5; }
+      .notice.show { transform: translateX(-50%) translateY(0); }
+      .small { color: rgba(255,255,255,.58); font-size: .9rem; }
+      .mobile-nav { display: none; }
+      @media (max-width: 900px) {
+        .app { grid-template-columns: 1fr; padding: .5rem; }
+        .side { display: none; }
+        .main { min-height: calc(100vh - 1rem); border-radius: 24px; }
+        .mobile-nav { display: grid; position: fixed; grid-template-columns: repeat(5,1fr); left: .75rem; right: .75rem; bottom: .75rem; padding: .5rem; border-radius: 22px; background: rgba(8,8,13,.88); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(18px); }
+        .mobile-nav button { border: 0; background: transparent; color: rgba(255,255,255,.72); font-weight: 900; padding: .4rem; }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="notice" class="notice"><strong>Te mencionaron</strong><div class="small" id="noticeText"></div></div>
+    <div class="app">
+      <aside class="panel side">
+        <div class="brand"><div class="logo">✦</div><div>Chismógrafo<br><span class="small">Social beta</span></div></div>
+        <nav>
+          <button>Feed</button><button>Retos</button><button>Menciones <span id="badge">2</span></button><button>Ranking</button><button>Seguridad</button>
+        </nav>
+      </aside>
+      <main class="main">
+        <div class="topbar"><strong>Para ti</strong><button class="ghost">🔔 <span id="badgeTop">2</span></button></div>
+        <section class="feed" id="feed">
+          <div class="screen">
+            <div class="composer">
+              <div class="chips" id="chips"></div>
+              <div class="card">
+                <div class="small">🔥 Pregunta caliente · anti abuso activo</div>
+                <h1 id="question"></h1>
+                <textarea id="answer" maxlength="220" placeholder="Menciona a @ana.spark, @luis.mov o @mia.crush..."></textarea>
+                <div class="row" style="margin-top:1rem">
+                  <div class="small">Ana · Luis · Mia · Noe</div>
+                  <div><button class="ghost" id="shuffle">Otra</button> <button class="send" id="send">Responder</button></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+      <aside class="side">
+        <div class="panel"><strong>🔔 Menciones en vivo</strong><div id="notifications" style="margin-top:1rem"></div></div>
+        <div class="panel" style="margin-top:1rem"><strong>👑 Ranking social</strong><p class="small">#1 @valeviral · Reina del chisme</p><p class="small">#2 @ana.spark · Subiendo rápido</p><p class="small">#3 @luis.mov · Viral semanal</p></div>
+      </aside>
+    </div>
+    <nav class="mobile-nav"><button>Feed</button><button>Retos</button><button>Crear</button><button>Avisos</button><button>Top</button></nav>
+    <script>
+      const questions = [
+        "¿Quién tiene más red flags pero cae increíble?",
+        "¿Quién sería meme viral por accidente?",
+        "¿Quién tendría un romance secreto?",
+        "¿Quién vendería fotos de pies y lo convertiría en startup?",
+        "¿Quién desaparecería por amor?"
+      ];
+      const feedItems = [
+        ["@ana.spark", "¿Quién tiene más red flags?", "@luis.mov pero en versión premium, porque hasta sus red flags tienen diseño.", "1.2K", "94", "310"],
+        ["@luis.mov", "¿Quién sería meme viral?", "@mia.crush sería meme viral y encima vendería merch al día siguiente.", "943", "51", "204"],
+        ["@mia.crush", "¿Quién se volvería famoso?", "@valeviral tiene aura de famosa accidental. Un video suyo y se cae la app.", "2.2K", "181", "620"]
+      ];
+      const categories = ["Todo", "Chisme", "Romance", "Humor", "Amistad", "Viral"];
+      let q = 0, unread = 2;
+      const feed = document.getElementById("feed");
+      const question = document.getElementById("question");
+      const notifications = document.getElementById("notifications");
+      function renderQuestion(){ question.textContent = questions[q % questions.length]; }
+      function renderChips(){ document.getElementById("chips").innerHTML = categories.map((c,i)=>`<button class="pill ${i===0?'active':''}">${c}</button>`).join(""); }
+      function renderFeed(){
+        feed.querySelectorAll(".item").forEach(n => n.remove());
+        feedItems.forEach(item => {
+          const div = document.createElement("article");
+          div.className = "screen item";
+          div.innerHTML = `<div class="composer"><div class="row"><div class="brand"><div class="avatar">${item[0][1].toUpperCase()}</div><div><strong>${item[0]}</strong><div class="small">calor viral 98%</div></div></div><button class="ghost">Seguir</button></div><div class="card" style="margin-top:1rem"><div class="small">⚡ Tendencia semanal</div><h2>${item[1]}</h2><p style="font-size:1.4rem;font-weight:900;line-height:1.25">${item[2]}</p><span class="mention">${(item[2].match(/@\\w+[.]?\\w+/)||["@amigo"])[0]}</span><div style="margin-top:1rem"><span class="metric">♥ ${item[3]}</span><span class="metric">💬 ${item[4]}</span><span class="metric">↗ ${item[5]}</span></div></div></div>`;
+          feed.appendChild(div);
+        });
+      }
+      function renderNotifications(text = "Mia respondió que tú serías famosa accidental."){
+        notifications.innerHTML = `<div class="card" style="padding:1rem;border-radius:18px"><strong>Te mencionaron</strong><p class="small">${text}</p><button class="ghost">Responder</button></div>`;
+        document.getElementById("badge").textContent = unread;
+        document.getElementById("badgeTop").textContent = unread;
+      }
+      document.getElementById("shuffle").onclick = () => { q++; renderQuestion(); };
+      document.getElementById("send").onclick = () => {
+        const value = document.getElementById("answer").value.trim();
+        if (!value) return;
+        feedItems.unshift(["@valeviral", questions[q % questions.length], value, "1", "0", "0"]);
+        if (/@(ana\.spark|luis\.mov|mia\.crush)/i.test(value)) {
+          unread++;
+          const notice = document.getElementById("notice");
+          document.getElementById("noticeText").textContent = questions[q % questions.length];
+          notice.classList.add("show");
+          setTimeout(() => notice.classList.remove("show"), 3200);
+          renderNotifications(questions[q % questions.length]);
+        }
+        document.getElementById("answer").value = "";
+        q++;
+        renderQuestion();
+        renderFeed();
+      };
+      renderChips(); renderQuestion(); renderFeed(); renderNotifications();
+    </script>
+  </body>
+</html>

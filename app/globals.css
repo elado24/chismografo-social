@@ -1,0 +1,77 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --bg: #08080d;
+  --panel: rgba(255, 255, 255, 0.08);
+  --line: rgba(255, 255, 255, 0.14);
+  --text: #fff8fb;
+  --muted: rgba(255, 248, 251, 0.66);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background:
+    radial-gradient(circle at 20% 10%, rgba(255, 77, 103, 0.28), transparent 24rem),
+    radial-gradient(circle at 88% 22%, rgba(70, 204, 255, 0.22), transparent 22rem),
+    linear-gradient(135deg, #08080d 0%, #111018 48%, #090b10 100%);
+  color: var(--text);
+  font-family: Arial, Helvetica, sans-serif;
+  letter-spacing: 0;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+.glass {
+  border: 1px solid var(--line);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.13), rgba(255, 255, 255, 0.06));
+  backdrop-filter: blur(20px);
+}
+
+.story-ring {
+  background: conic-gradient(from 0deg, #ff4d67, #f8d34a, #21f5aa, #46ccff, #ff4d67);
+}
+
+.hide-scrollbar {
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg: #fff7fb;
+    --text: #111018;
+    --muted: rgba(17, 16, 24, 0.62);
+    --panel: rgba(255, 255, 255, 0.72);
+    --line: rgba(17, 16, 24, 0.12);
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 22% 10%, rgba(255, 77, 103, 0.2), transparent 22rem),
+      radial-gradient(circle at 86% 8%, rgba(33, 245, 170, 0.18), transparent 18rem),
+      #fff7fb;
+  }
+}
