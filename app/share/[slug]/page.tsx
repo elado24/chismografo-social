@@ -3,10 +3,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 type Props = { params: Promise<{ slug: string }> };
+const baseUrl = process.env.NEXTAUTH_URL ?? "https://chismografo-social.vercel.app";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const item = feedItems.find((entry) => entry.slug === slug) ?? feedItems[0];
+  const url = `${baseUrl}/share/${slug}`;
 
   return {
     title: `${item.author.name} respondió en Chismógrafo Social`,
@@ -14,7 +16,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     openGraph: {
       title: item.question,
       description: item.answer,
+      type: "website",
+      url,
+      siteName: "Chismógrafo Social",
       images: [{ url: `/api/og/${slug}`, width: 1200, height: 630 }]
+    },
+    other: {
+      "fb:app_id": process.env.FACEBOOK_APP_ID ?? "000000000000000"
     },
     twitter: {
       card: "summary_large_image",
