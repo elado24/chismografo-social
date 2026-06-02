@@ -19,8 +19,8 @@ export const metadata: Metadata = {
     siteName: title,
     images: [{ url: "/og-chismografo.png", width: 1200, height: 630 }]
   },
-  other: {
-    "fb:app_id": process.env.FACEBOOK_APP_ID ?? "000000000000000"
+  facebook: {
+    appId: process.env.FACEBOOK_APP_ID ?? "000000000000000"
   },
   twitter: {
     card: "summary_large_image",
