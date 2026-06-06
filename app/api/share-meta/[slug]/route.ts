@@ -1,4 +1,5 @@
 import { feedItems } from "@/data/demo";
+import { appBaseUrl, facebookAppId } from "@/lib/constants";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -12,21 +13,19 @@ function escapeHtml(value: string) {
 
 export async function GET(_request: Request, { params }: Props) {
   const { slug } = await params;
-  const baseUrl = process.env.NEXTAUTH_URL ?? "https://chismografo-social.vercel.app";
   const item = feedItems.find((entry) => entry.slug === slug) ?? feedItems[0];
-  const url = `${baseUrl}/share/${slug}`;
-  const image = `${baseUrl}/api/og/${slug}`;
-  const appId = process.env.FACEBOOK_APP_ID ?? "000000000000000";
+  const url = `${appBaseUrl}/share/${slug}`;
+  const image = `${appBaseUrl}/api/og/${slug}`;
   const title = escapeHtml(item.question);
   const description = escapeHtml(item.answer);
 
   const html = `<!doctype html>
-<html lang="es">
+<html lang="es" prefix="og: https://ogp.me/ns# fb: https://ogp.me/ns/fb#">
 <head>
   <meta charset="utf-8">
   <title>${title}</title>
   <meta name="description" content="${description}">
-  <meta property="fb:app_id" content="${escapeHtml(appId)}">
+  <meta property="fb:app_id" content="${escapeHtml(facebookAppId)}">
   <meta property="og:url" content="${escapeHtml(url)}">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="Chismógrafo Social">
@@ -37,6 +36,7 @@ export async function GET(_request: Request, { params }: Props) {
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="1200">
   <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Chismógrafo Social - respuesta viral">
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="${title}">
   <meta name="twitter:description" content="${description}">
